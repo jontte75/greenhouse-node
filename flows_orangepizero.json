@@ -1,1 +1,501 @@
-[{"id":"a237b9f5.a763d8","type":"tab","label":"Flow 1","disabled":false,"info":""},{"id":"ffb35635.68c608","type":"serial-port","z":"","serialport":"/dev/ttyUSB0","serialbaud":"9600","databits":"8","parity":"none","stopbits":"1","newline":"\\r\\n","bin":"false","out":"char","addchar":true,"responsetimeout":"20000"},{"id":"1af02873.b90ed","type":"ui_base","theme":{"name":"theme-dark","lightTheme":{"default":"#0094CE","baseColor":"#0094CE","baseFont":"-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif","edited":true,"reset":false},"darkTheme":{"default":"#097479","baseColor":"#097479","baseFont":"-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif","edited":true,"reset":false},"customTheme":{"name":"Untitled Theme 1","default":"#4B7930","baseColor":"#4B7930","baseFont":"-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"},"themeState":{"base-color":{"default":"#097479","value":"#097479","edited":false},"page-titlebar-backgroundColor":{"value":"#097479","edited":false},"page-backgroundColor":{"value":"#111111","edited":false},"page-sidebar-backgroundColor":{"value":"#000000","edited":false},"group-textColor":{"value":"#0eb8c0","edited":false},"group-borderColor":{"value":"#555555","edited":false},"group-backgroundColor":{"value":"#333333","edited":false},"widget-textColor":{"value":"#eeeeee","edited":false},"widget-backgroundColor":{"value":"#097479","edited":false},"widget-borderColor":{"value":"#333333","edited":false},"base-font":{"value":"-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"}}},"site":{"name":"Node-RED Dashboard","hideToolbar":"false","allowSwipe":"false","allowTempTheme":"true","dateFormat":"DD/MM/YYYY","sizes":{"sx":48,"sy":48,"gx":6,"gy":6,"cx":6,"cy":6,"px":0,"py":0}}},{"id":"7cac9c5a.ed5f34","type":"ui_tab","z":"","name":"Home","icon":"mood","order":1},{"id":"64a56795.e70d88","type":"ui_group","z":"","name":"Default","tab":"7cac9c5a.ed5f34","disp":true,"width":"6","collapse":true},{"id":"328a4619.f75d72","type":"ui_group","z":"","name":"Outside","tab":"7cac9c5a.ed5f34","order":2,"disp":true,"width":"6","collapse":true},{"id":"ed51e555.c146","type":"ui_tab","z":"","name":"Configuration","icon":"settings","order":2},{"id":"91c6c06b.adb83","type":"ui_group","name":"Group 1","tab":"ed51e555.c146","order":1,"disp":true,"width":6},{"id":"14cb6b7c.9e9135","type":"serial request","z":"a237b9f5.a763d8","name":"arduino","serial":"ffb35635.68c608","x":421.5,"y":133,"wires":[["d2247020.66a518"]]},{"id":"52f9f79e.8b8768","type":"debug","z":"a237b9f5.a763d8","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":865.5,"y":35,"wires":[]},{"id":"fcc20fe4.72637","type":"inject","z":"a237b9f5.a763d8","name":"","topic":"Hello","payload":"hello","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":180.5,"y":174,"wires":[["14cb6b7c.9e9135"]]},{"id":"eb90912d.3add","type":"inject","z":"a237b9f5.a763d8","name":"","topic":"Get values periodically","payload":"get","payloadType":"str","repeat":"600","crontab":"","once":false,"onceDelay":0.1,"x":181.5,"y":89,"wires":[["14cb6b7c.9e9135"]]},{"id":"2b019685.f3a57a","type":"thingspeak42","z":"a237b9f5.a763d8","name":"ThingSpeak","delay":"15","topic1":"Temp inside","topic2":"Humidity","topic3":"Temp case","topic4":"Temp outside","topic5":"Light","topic6":"Moisture","topic7":"Window status","topic8":"","endpoint":"https://thingspeak.com","x":924.5,"y":127,"wires":[]},{"id":"d2247020.66a518","type":"function","z":"a237b9f5.a763d8","name":"split greenhouse values","func":"msg.payload = msg.payload.replace(/\\n/, '');\nvar values = msg.payload.split(\":\");\nvar messages = [];\nif (values.length === 7){\n    messages.push({topic:\"Temp inside\", payload:values[0]});\n    messages.push({topic:\"Humidity\", payload:values[1]});\n    messages.push({topic:\"Temp case\", payload:values[2]});\n    messages.push({topic:\"Temp outside\", payload:values[3]});\n    messages.push({topic:\"Light\", payload:values[4]});\n    messages.push({topic:\"Moisture\", payload:values[5]});\n    messages.push({topic:\"Window status\", payload:values[6]});\n    return [messages, null];\n} else {\n return [null, msg] \n}\n","outputs":2,"noerr":0,"x":644.5,"y":135,"wires":[["52f9f79e.8b8768","7e3f54fa.fccd54","2b019685.f3a57a"],["52f9f79e.8b8768","10e83d1.5924ac3"]]},{"id":"4624cfb6.b9faf8","type":"ui_gauge","z":"a237b9f5.a763d8","name":"Temp inside","group":"64a56795.e70d88","order":3,"width":0,"height":0,"gtype":"gage","title":"Temp inside","label":"C","format":"{{value}}","min":"-10","max":"50","colors":["#1c8ee6","#47e600","#ca3838"],"seg1":"18","seg2":"25","x":971.5,"y":184,"wires":[]},{"id":"7e3f54fa.fccd54","type":"switch","z":"a237b9f5.a763d8","name":"switch for ui","property":"topic","propertyType":"msg","rules":[{"t":"eq","v":"Temp inside","vt":"str"},{"t":"eq","v":"Temp outside","vt":"str"},{"t":"eq","v":"Temp case","vt":"str"},{"t":"eq","v":"Humidity","vt":"str"},{"t":"eq","v":"Window status","vt":"str"},{"t":"eq","v":"Light","vt":"str"}],"checkall":"true","repair":false,"outputs":6,"x":750,"y":280,"wires":[["4624cfb6.b9faf8"],["3998bd4f.906b3a"],["d64b20ab.517498"],["ae70da4c.57ad48"],["9f246757.5e0c3"],["7deafa4c.d7f16c"]]},{"id":"3998bd4f.906b3a","type":"ui_gauge","z":"a237b9f5.a763d8","name":"","group":"64a56795.e70d88","order":2,"width":0,"height":0,"gtype":"gage","title":"Temp outside","label":"C","format":"{{value}}","min":"-20","max":"40","colors":["#1c8ee6","#47e600","#ca3838"],"seg1":"18","seg2":"25","x":981,"y":222,"wires":[]},{"id":"d64b20ab.517498","type":"ui_gauge","z":"a237b9f5.a763d8","name":"","group":"64a56795.e70d88","order":4,"width":0,"height":0,"gtype":"gage","title":"Temp case","label":"C","format":"{{value}}","min":"5","max":"60","colors":["#1c8ee6","#47e600","#ca3838"],"seg1":"20","seg2":"35","x":971,"y":261,"wires":[]},{"id":"ae70da4c.57ad48","type":"ui_gauge","z":"a237b9f5.a763d8","name":"","group":"64a56795.e70d88","order":5,"width":0,"height":0,"gtype":"donut","title":"Humidity","label":"%","format":"{{value}}","min":"0","max":"100","colors":["#e6be1c","#47e600","#ca3838"],"seg1":"40","seg2":"80","x":960,"y":301,"wires":[]},{"id":"9f246757.5e0c3","type":"ui_slider","z":"a237b9f5.a763d8","name":"","label":"Window status (closed - open)","group":"328a4619.f75d72","order":2,"width":0,"height":0,"passthru":false,"topic":"","min":0,"max":"1","step":1,"x":1027.5,"y":339,"wires":[[]]},{"id":"7deafa4c.d7f16c","type":"ui_gauge","z":"a237b9f5.a763d8","name":"","group":"328a4619.f75d72","order":1,"width":0,"height":0,"gtype":"gage","title":"Light","label":"units","format":"{{value}}","min":0,"max":"1023","colors":["#3aee0a","#e6e600","#ff0325"],"seg1":"767","seg2":"920","x":950,"y":380,"wires":[]},{"id":"10e83d1.5924ac3","type":"ui_text","z":"a237b9f5.a763d8","group":"91c6c06b.adb83","order":1,"width":0,"height":0,"name":"","label":"text","format":"{{msg.payload}}","layout":"row-spread","x":508.5,"y":395,"wires":[]}]
+[
+    {
+        "id": "a237b9f5.a763d8",
+        "type": "tab",
+        "label": "Get values from arduino",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "ffb35635.68c608",
+        "type": "serial-port",
+        "z": "",
+        "serialport": "/dev/ttyUSB0",
+        "serialbaud": "9600",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "newline": "\\r\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": true,
+        "responsetimeout": "20000"
+    },
+    {
+        "id": "1af02873.b90ed",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-dark",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#097479",
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#000000",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "7cac9c5a.ed5f34",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Home",
+        "icon": "mood",
+        "order": 1
+    },
+    {
+        "id": "64a56795.e70d88",
+        "type": "ui_group",
+        "z": "",
+        "name": "Default",
+        "tab": "7cac9c5a.ed5f34",
+        "disp": true,
+        "width": "6",
+        "collapse": true
+    },
+    {
+        "id": "328a4619.f75d72",
+        "type": "ui_group",
+        "z": "",
+        "name": "Outside",
+        "tab": "7cac9c5a.ed5f34",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": true
+    },
+    {
+        "id": "ed51e555.c146",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Configuration",
+        "icon": "settings",
+        "order": 2
+    },
+    {
+        "id": "91c6c06b.adb83",
+        "type": "ui_group",
+        "name": "Group 1",
+        "tab": "ed51e555.c146",
+        "order": 1,
+        "disp": true,
+        "width": 6
+    },
+    {
+        "id": "14cb6b7c.9e9135",
+        "type": "serial request",
+        "z": "a237b9f5.a763d8",
+        "name": "arduino",
+        "serial": "ffb35635.68c608",
+        "x": 421.5,
+        "y": 133,
+        "wires": [
+            [
+                "d2247020.66a518"
+            ]
+        ]
+    },
+    {
+        "id": "52f9f79e.8b8768",
+        "type": "debug",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 865.5,
+        "y": 35,
+        "wires": []
+    },
+    {
+        "id": "fcc20fe4.72637",
+        "type": "inject",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "topic": "Hello",
+        "payload": "hello",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180.5,
+        "y": 174,
+        "wires": [
+            [
+                "14cb6b7c.9e9135"
+            ]
+        ]
+    },
+    {
+        "id": "eb90912d.3add",
+        "type": "inject",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "topic": "Get values periodically",
+        "payload": "get",
+        "payloadType": "str",
+        "repeat": "600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 181.5,
+        "y": 89,
+        "wires": [
+            [
+                "14cb6b7c.9e9135"
+            ]
+        ]
+    },
+    {
+        "id": "2b019685.f3a57a",
+        "type": "thingspeak42",
+        "z": "a237b9f5.a763d8",
+        "name": "ThingSpeak",
+        "delay": "15",
+        "topic1": "Temp inside",
+        "topic2": "Humidity",
+        "topic3": "Temp case",
+        "topic4": "Temp outside",
+        "topic5": "Light",
+        "topic6": "Moisture",
+        "topic7": "Window status",
+        "topic8": "",
+        "endpoint": "https://thingspeak.com",
+        "x": 924.5,
+        "y": 127,
+        "wires": []
+    },
+    {
+        "id": "d2247020.66a518",
+        "type": "function",
+        "z": "a237b9f5.a763d8",
+        "name": "split greenhouse values",
+        "func": "msg.payload = msg.payload.replace(/\\n/, '');\nvar values = msg.payload.split(\":\");\nvar messages = [];\nif (values.length === 7){\n    messages.push({topic:\"Temp inside\", payload:values[0]});\n    messages.push({topic:\"Humidity\", payload:values[1]});\n    messages.push({topic:\"Temp case\", payload:values[2]});\n    messages.push({topic:\"Temp outside\", payload:values[3]});\n    messages.push({topic:\"Light\", payload:values[4]});\n    messages.push({topic:\"Moisture\", payload:values[5]});\n    messages.push({topic:\"Window status\", payload:values[6]});\n    return [messages, null];\n} else {\n return [null, msg] \n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 644.5,
+        "y": 135,
+        "wires": [
+            [
+                "52f9f79e.8b8768",
+                "7e3f54fa.fccd54",
+                "2b019685.f3a57a"
+            ],
+            [
+                "52f9f79e.8b8768",
+                "10e83d1.5924ac3"
+            ]
+        ]
+    },
+    {
+        "id": "4624cfb6.b9faf8",
+        "type": "ui_gauge",
+        "z": "a237b9f5.a763d8",
+        "name": "Temp inside",
+        "group": "64a56795.e70d88",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temp inside",
+        "label": "C",
+        "format": "{{value}}",
+        "min": "-10",
+        "max": "50",
+        "colors": [
+            "#1c8ee6",
+            "#47e600",
+            "#ca3838"
+        ],
+        "seg1": "18",
+        "seg2": "25",
+        "x": 971.5,
+        "y": 184,
+        "wires": []
+    },
+    {
+        "id": "7e3f54fa.fccd54",
+        "type": "switch",
+        "z": "a237b9f5.a763d8",
+        "name": "switch for ui",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Temp inside",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Temp outside",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Temp case",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Humidity",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Window status",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Light",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 6,
+        "x": 750,
+        "y": 280,
+        "wires": [
+            [
+                "4624cfb6.b9faf8"
+            ],
+            [
+                "3998bd4f.906b3a"
+            ],
+            [
+                "d64b20ab.517498"
+            ],
+            [
+                "ae70da4c.57ad48"
+            ],
+            [
+                "9f246757.5e0c3"
+            ],
+            [
+                "7deafa4c.d7f16c"
+            ]
+        ]
+    },
+    {
+        "id": "3998bd4f.906b3a",
+        "type": "ui_gauge",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "group": "64a56795.e70d88",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temp outside",
+        "label": "C",
+        "format": "{{value}}",
+        "min": "-20",
+        "max": "40",
+        "colors": [
+            "#1c8ee6",
+            "#47e600",
+            "#ca3838"
+        ],
+        "seg1": "18",
+        "seg2": "25",
+        "x": 981,
+        "y": 222,
+        "wires": []
+    },
+    {
+        "id": "d64b20ab.517498",
+        "type": "ui_gauge",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "group": "64a56795.e70d88",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temp case",
+        "label": "C",
+        "format": "{{value}}",
+        "min": "5",
+        "max": "60",
+        "colors": [
+            "#1c8ee6",
+            "#47e600",
+            "#ca3838"
+        ],
+        "seg1": "20",
+        "seg2": "35",
+        "x": 971,
+        "y": 261,
+        "wires": []
+    },
+    {
+        "id": "ae70da4c.57ad48",
+        "type": "ui_gauge",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "group": "64a56795.e70d88",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "gtype": "donut",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#e6be1c",
+            "#47e600",
+            "#ca3838"
+        ],
+        "seg1": "40",
+        "seg2": "80",
+        "x": 960,
+        "y": 301,
+        "wires": []
+    },
+    {
+        "id": "9f246757.5e0c3",
+        "type": "ui_slider",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "label": "Window status (closed - open)",
+        "group": "328a4619.f75d72",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "",
+        "min": 0,
+        "max": "1",
+        "step": 1,
+        "x": 1027.5,
+        "y": 339,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7deafa4c.d7f16c",
+        "type": "ui_gauge",
+        "z": "a237b9f5.a763d8",
+        "name": "",
+        "group": "328a4619.f75d72",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Light",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "1023",
+        "colors": [
+            "#3aee0a",
+            "#e6e600",
+            "#ff0325"
+        ],
+        "seg1": "767",
+        "seg2": "920",
+        "x": 950,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "10e83d1.5924ac3",
+        "type": "ui_text",
+        "z": "a237b9f5.a763d8",
+        "group": "91c6c06b.adb83",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "text",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 508.5,
+        "y": 395,
+        "wires": []
+    }
+]
